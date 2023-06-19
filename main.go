@@ -4,20 +4,12 @@ import (
 	"github.com/gorilla/mux"
 	"lld-tdd/controllers"
 	"lld-tdd/service"
-	"log"
 	"net/http"
 )
 
 func main() {
-	//service.Connect()
-	//service.Migrate()
-
-	db, err := service.ConnectDB()
-	if err != nil {
-		panic("Failed to connect to database")
-	}
-	log.Print("Connected to DB")
-	service.MigrateDB(db)
+	service.Connect()
+	service.Migrate()
 
 	router := mux.NewRouter().StrictSlash(true)
 

@@ -2,7 +2,6 @@ package service
 
 import (
 	"lld-tdd/models"
-	"log"
 )
 
 type userSignup interface {
@@ -10,14 +9,8 @@ type userSignup interface {
 }
 
 func createInDB(user models.User) models.User {
-	db, err := ConnectDB()
-	if err != nil {
-		panic("Failed to connect to database")
-	}
-	db.Create(&user)
-
-	//DBInstance.Create(&user)
-	log.Print(user)
+	DBInstance.Create(&user)
+	//log.Print(user)
 	return user
 }
 

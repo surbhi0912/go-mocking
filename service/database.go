@@ -10,33 +10,18 @@ import (
 var DBInstance *gorm.DB
 var err error
 
-//func Connect() {
-//	dsn := "root:@tcp(localhost:3306)/lldtdd?charset=utf8mb4&parseTime=True&loc=Local"
-//	DBInstance, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
-//	if err != nil {
-//		log.Fatal(err)
-//		panic("Cannot connect to DB")
-//	}
-//	log.Println("Connected to DB")
-//}
-//
-//func Migrate() {
-//	// creates table if it doesn't exist
-//	DBInstance.AutoMigrate(&models.User{})
-//	log.Println("Database migration completed..")
-//}
-
-func ConnectDB() (*gorm.DB, error) {
-	// Database connection configuration
+func Connect() {
 	dsn := "root:@tcp(localhost:3306)/lldtdd?charset=utf8mb4&parseTime=True&loc=Local"
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	DBInstance, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
-		return nil, err
+		log.Fatal(err)
+		panic("Cannot connect to DB")
 	}
-	return db, nil
+	log.Println("Connected to DB")
 }
 
-func MigrateDB(db *gorm.DB) {
-	db.AutoMigrate(&models.User{})
+func Migrate() {
+	// creates table if it doesn't exist
+	DBInstance.AutoMigrate(&models.User{})
 	log.Println("Database migration completed..")
 }
