@@ -16,7 +16,6 @@ func createInDB(user models.User) models.User {
 	}
 	db.Create(&user)
 
-	//DBInstance.Create(&user)
 	log.Print(user)
 	return user
 }

@@ -9,8 +9,6 @@ import (
 )
 
 func main() {
-	//service.Connect()
-	//service.Migrate()
 
 	db, err := service.ConnectDB()
 	if err != nil {
