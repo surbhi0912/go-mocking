@@ -1,11 +1,12 @@
 package service
 
 import (
+	"fmt"
 	"lld-tdd/models"
 )
 
 type userSignup interface {
-	signup(signupType string) error
+	signup(signupType string) *models.User
 }
 
 func createInDB(user *models.User) error {
@@ -35,31 +36,19 @@ type EmailUser struct {
 	Password string
 }
 
-func (e *EmailUser) signup(signupType string) error {
+func (e *EmailUser) signup(signupType string) *models.User {
 	user := &models.User{Email: e.Email, Password: e.Password, SignupType: signupType}
-	err := createInDB(user)
-	if err != nil {
-		return err
-	}
-	return nil
+	return user
 }
 
-func (f *FacebookUser) signup(signupType string) error {
+func (f *FacebookUser) signup(signupType string) *models.User {
 	user := &models.User{Email: f.Email, Password: f.Password, SignupType: signupType}
-	err := createInDB(user)
-	if err != nil {
-		return err
-	}
-	return nil
+	return user
 }
 
-func (g *GoogleUser) signup(signupType string) error {
+func (g *GoogleUser) signup(signupType string) *models.User {
 	user := &models.User{Email: g.Email, Password: g.Password, SignupType: signupType}
-	err := createInDB(user)
-	if err != nil {
-		return err
-	}
-	return nil
+	return user
 }
 
 func UserSignupFactory(user *models.User) userSignup {
@@ -68,18 +57,24 @@ func UserSignupFactory(user *models.User) userSignup {
 		return &EmailUser{Email: user.Email, Password: user.Password}
 	case "Facebook":
 		return &FacebookUser{Email: user.Email, Password: user.Password}
-		break
 	case "Google":
 		return &GoogleUser{Email: user.Email, Password: user.Password}
-		break
 	}
 	return nil
 }
 
 func CreateNewUser(user *models.User) error {
-	err := UserSignupFactory(user).signup(user.SignupType)
+	if user.SignupType != "Email" && user.SignupType != "Facebook" && user.SignupType != "Google" {
+		return fmt.Errorf("Invalid signup type")
+	}
+	u := UserSignupFactory(user).signup(user.SignupType)
+	db, err := ConnectDB()
 	if err != nil {
-		return err
+		panic("Failed to connect to database")
+	}
+	result := db.Create(u)
+	if result.Error != nil {
+		return result.Error
 	}
 	return nil
 }
