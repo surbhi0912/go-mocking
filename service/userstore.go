@@ -2,7 +2,10 @@ package service
 
 import (
 	"fmt"
+	"gorm.io/gorm"
 	"lld-tdd/models"
+	"log"
+	"regexp"
 )
 
 type userSignup interface {
@@ -51,17 +54,30 @@ func UserSignupFactory(user *models.User) userSignup {
 	return nil
 }
 
-func CreateNewUser(user *models.User) error {
+func IsValidEmail(email string) bool {
+	// Simple email validation using regular expression
+	regex := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
+	return regexp.MustCompile(regex).MatchString(email)
+}
+
+func CreateNewUser(db *gorm.DB, user *models.User) error {
+	if user.Password == "" {
+		return fmt.Errorf("%v", "Password cannot be empty")
+	}
+	if user.Email == "" || !IsValidEmail(user.Email) {
+		return fmt.Errorf("%v", "Invalid email")
+	}
 	if user.SignupType != "Email" && user.SignupType != "Facebook" && user.SignupType != "Google" {
-		return fmt.Errorf("Invalid signup type")
+		return fmt.Errorf("%v", "Invalid signup type")
 	}
 	u := UserSignupFactory(user).signup(user.SignupType)
-	db, err := ConnectDB()
-	if err != nil {
-		panic("Failed to connect to database")
-	}
+	//db, err := ConnectDB()
+	//if err != nil {
+	//	panic("Failed to connect to database")
+	//}
 	result := db.Create(u)
 	if result.Error != nil {
+		log.Print(result.Error.Error())
 		return result.Error
 	}
 	return nil
