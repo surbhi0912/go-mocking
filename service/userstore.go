@@ -9,18 +9,6 @@ type userSignup interface {
 	signup(signupType string) *models.User
 }
 
-func createInDB(user *models.User) error {
-	db, err := ConnectDB()
-	if err != nil {
-		panic("Failed to connect to database")
-	}
-	result := db.Create(user)
-	if result.Error != nil {
-		return result.Error
-	}
-	return nil
-}
-
 type FacebookUser struct {
 	Email    string
 	Password string
