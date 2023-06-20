@@ -19,7 +19,7 @@ func main() {
 
 	router := mux.NewRouter().StrictSlash(true)
 
-	router.HandleFunc("/signup", controllers.Signup).Methods("POST")
+	router.HandleFunc("/signup", controllers.SignupUser).Methods("POST")
 
 	http.ListenAndServe(":8080", router)
 }

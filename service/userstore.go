@@ -2,22 +2,22 @@ package service
 
 import (
 	"lld-tdd/models"
-	"log"
 )
 
 type userSignup interface {
-	signup(signupType string) models.User
+	signup(signupType string) error
 }
 
-func createInDB(user models.User) models.User {
+func createInDB(user *models.User) error {
 	db, err := ConnectDB()
 	if err != nil {
 		panic("Failed to connect to database")
 	}
-	db.Create(&user)
-
-	log.Print(user)
-	return user
+	result := db.Create(user)
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
 }
 
 type FacebookUser struct {
@@ -35,22 +35,34 @@ type EmailUser struct {
 	Password string
 }
 
-func (e *EmailUser) signup(signupType string) models.User {
-	user := models.User{Email: e.Email, Password: e.Password, SignupType: signupType}
-	return createInDB(user)
+func (e *EmailUser) signup(signupType string) error {
+	user := &models.User{Email: e.Email, Password: e.Password, SignupType: signupType}
+	err := createInDB(user)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
-func (f *FacebookUser) signup(signupType string) models.User {
-	user := models.User{Email: f.Email, Password: f.Password, SignupType: signupType}
-	return createInDB(user)
+func (f *FacebookUser) signup(signupType string) error {
+	user := &models.User{Email: f.Email, Password: f.Password, SignupType: signupType}
+	err := createInDB(user)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
-func (g *GoogleUser) signup(signupType string) models.User {
-	user := models.User{Email: g.Email, Password: g.Password, SignupType: signupType}
-	return createInDB(user)
+func (g *GoogleUser) signup(signupType string) error {
+	user := &models.User{Email: g.Email, Password: g.Password, SignupType: signupType}
+	err := createInDB(user)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
-func UserSignupFactory(user models.User) userSignup {
+func UserSignupFactory(user *models.User) userSignup {
 	switch signupType := user.SignupType; signupType {
 	case "Email":
 		return &EmailUser{Email: user.Email, Password: user.Password}
@@ -64,11 +76,10 @@ func UserSignupFactory(user models.User) userSignup {
 	return nil
 }
 
-func CreateNewUser(user models.User) string {
-	u := UserSignupFactory(user).signup(user.SignupType)
-	if u.ID < models.MinUserID {
-		return "Email already exists"
-	} else {
-		return "Successfully signed up user"
+func CreateNewUser(user *models.User) error {
+	err := UserSignupFactory(user).signup(user.SignupType)
+	if err != nil {
+		return err
 	}
+	return nil
 }
