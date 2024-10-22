@@ -60,22 +60,32 @@ func IsValidEmail(email string) bool {
 	return regexp.MustCompile(regex).MatchString(email)
 }
 
-func CreateNewUser(db *gorm.DB, user *models.User) error {
-	if user.Password == "" {
+func CreateUser(user *models.User) error {
+	db, err := ConnectDB()
+	if err != nil {
+		panic("Failed to connect to database")
+	}
+	err = CreateNewUser(db, user)
+	return err
+}
+func CreateNewUser(db *gorm.DB, userRequest *models.User) error {
+	if userRequest.Password == "" {
 		return fmt.Errorf("%v", "Password cannot be empty")
 	}
-	if user.Email == "" || !IsValidEmail(user.Email) {
+	if userRequest.Email == "" || !IsValidEmail(userRequest.Email) {
 		return fmt.Errorf("%v", "Invalid email")
 	}
-	if user.SignupType != "Email" && user.SignupType != "Facebook" && user.SignupType != "Google" {
+	if userRequest.SignupType != "Email" && userRequest.SignupType != "Facebook" && userRequest.SignupType != "Google" {
 		return fmt.Errorf("%v", "Invalid signup type")
 	}
-	u := UserSignupFactory(user).signup(user.SignupType)
-	//db, err := ConnectDB()
-	//if err != nil {
-	//	panic("Failed to connect to database")
-	//}
-	result := db.Create(u)
+
+	userToDbCreate := UserSignupFactory(userRequest)
+	if userToDbCreate == nil {
+		return fmt.Errorf("%v", "Invalid signup type")
+	}
+	userDbCreated := userToDbCreate.signup(userRequest.SignupType)
+
+	result := db.Create(userDbCreated)
 	if result.Error != nil {
 		log.Print(result.Error.Error())
 		return result.Error
